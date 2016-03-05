@@ -1,9 +1,23 @@
-/*! 
+/*! -----------------------------------------------------------------------
  * Mouse exerise wheel counter
- * ---------------------------
+ * Copyright [2016] Andy Dachs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  * 
- * We want to see how excerise our mouse is doing so want to count the number of revoltions
- * on his mouse wheel.  We don;t care which way the wheel is turning or how fast.
+ * ------------------------------------------------------------------------
+ * 
+ * We want to see how exercise our mouse is doing so want to count the number of revolutions
+ * on his mouse wheel.  We don't care which way the wheel is turning or how fast.
  * In principle this is quite a simple revolution counter.
  * 
  * A magnet is glued under the wheel and every time it passes over a hall effect sensor (A) it
@@ -15,12 +29,6 @@
  * wheel generates a signal from one of the sensors and every half turn passes sensor A and 
  * increments the count.  We are actually counting half revolutions so the result is scaled by 
  * two before display.
- * 
- * In terms of assembly, the wheel is made of special mouse safe plastic but the rest of the wires 
- * and electronics need to be safe.  The simplest way to get a circular PCB right up close to 
- * the wheel was to canibalise the encoder board from a small motor (dx.com sku:418535). The rest of 
- * the electronics will be housed in an aluminium enclosure and battery powered for safety. The cables 
- * running between the sensors and enclosre are sheathed in steel braid.
  * 
  * The display is the AdaFruit OLED 128x32 I2C module
  * 
@@ -120,7 +128,6 @@ void loop()
   }
 
 }
-
 
 /*! 
  * Interrupt on A changing state
