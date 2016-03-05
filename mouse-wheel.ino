@@ -12,7 +12,7 @@
  * with the magnet just over the sensor.  To avoid them, a second magnet is glued 180 degrees 
  * further round the wheel.  A second hall effect sensor (B) is placed at 90 degrees.  Each time 
  * a magnet passes a sensor we switch to looking at the other sensor.  Every 1/4 revolution the 
- * wheel generates a signel from one of the sensors and every half turn passes sensor A and 
+ * wheel generates a signal from one of the sensors and every half turn passes sensor A and 
  * increments the count.  We are actually counting half revolutions so the result is scaled by 
  * two before display.
  * 
