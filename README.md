@@ -21,10 +21,26 @@ The rest of the electronics will be housed in an aluminium enclosure and battery
 
 The display is the AdaFruit OLED 128x32 I2C module
 
-## Hardware
+## Components
+### Hardware
 [Display Module](https://www.adafruit.com/products/931) Adafruit OLED display
+
 [Sensor PCB](http://www.dx.com/p/high-torque-25mm-dc-12-0v-330rpm-encoder-precision-gear-motor-418535) Removed from Motor
+
 [Nano DCCDuino](http://www.dx.com/p/new-nano-v3-0-module-atmega328p-au-improved-version-for-arduino-yellow-369070) Set Arduino IDE for Arduino Nano
 
-## Libraries
+### Libraries
 Requires the Adafruit_GFX and Adafruit_SSD1306. Just install them using the library manager.
+
+## Results
+
+The waveform from the two hall effect sensors can be seen below.
+
+![Hall Effect sensor outputs](/images/Screenshot 2016-03-05 19.19.12.png)
+
+A falling edge on the top trace is counted only after there has been a falling edge on the second trace (brown).
+
+If the wheel happens to stop over one of the sensors a noisy trace is generated but the addtional transitions are not counted as there is no activity on the second channel.
+
+![Wheel stops over one sensor](/images/Screenshot 2016-03-05 19.25.40.png)
+
