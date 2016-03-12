@@ -43,6 +43,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <avr/sleep.h>
 
 #define ENCODER_A  2          // hall effect sensor A
 #define ENCODER_B  3          // quadrature hall effect sensor B
@@ -50,6 +51,9 @@
 
 #define MAX_COUNT (unsigned long)10000000
 
+#define SERIAL_OUTPUT 0
+
+#define DISPLAY_TIME_OUT  10000    // display timeout in ms
 
 /*! These variables must be declared volatile because they
  * are modifed in the interrupt handlers. If the main loop
@@ -58,6 +62,7 @@
 volatile unsigned int encoder0Pos = 0;
 volatile unsigned long revCount;
 volatile boolean expectA;
+volatile boolean displayIsActive = true;
 
 
 Adafruit_SSD1306 display(OLED_RESET);
@@ -73,7 +78,8 @@ void setup()
   /* Initialise OLED */
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
   display.clearDisplay();                     // Clear the buffer.
-
+  display.dim(true);
+    
   // encoder pin on interrupt 0 (pin 2)
   attachInterrupt(0, doEncoderA, FALLING);
 
@@ -81,7 +87,9 @@ void setup()
   attachInterrupt(1, doEncoderB, FALLING);
 
   // serial output
+#if SERIAL_OUTPUT
   Serial.begin (115200);
+#endif
 }
 
 
@@ -91,6 +99,7 @@ void loop()
   unsigned long newRevs;
   uint8_t oldSFR;
   static unsigned long oldRevs = -1;
+  static unsigned long displayOnTime = 0;
 
   /* disable interrupts so we can safely read and modify variables */
   oldSFR = SREG;
@@ -104,10 +113,19 @@ void loop()
   newRevs = count/2;
 
   /* if there is a change, update display */
-  if (oldRevs != newRevs )
+  if ((oldRevs != newRevs )  )
   {
     oldRevs = newRevs;
 
+    displayOnTime = millis();
+
+    if( !displayIsActive )
+    {
+      displayIsActive = true;
+      display.ssd1306_command( SSD1306_DISPLAYON );
+//      display.dim(false);
+    }
+    
     display.clearDisplay();
     display.setCursor(1,5);
     display.setTextSize(3);
@@ -120,12 +138,33 @@ void loop()
       unsigned int digit = (newRevs / position) % 10;
       display.print( digit );
       position /= 10;
+#if SERIAL_OUTPUT
       Serial.print( digit );
+#endif
     } while( position > 0 );
     
     display.display();    
+#if SERIAL_OUTPUT
     Serial.println();
+#endif
   }
+
+  if( millis() - displayOnTime > DISPLAY_TIME_OUT )
+  {
+    displayIsActive = false;
+    display.ssd1306_command( SSD1306_DISPLAYOFF );
+//    display.dim(true);
+    set_sleep_mode( SLEEP_MODE_PWR_DOWN );
+    sleep_enable();
+    sleep_mode();
+  }
+
+
+  // execute from here on wakeup
+  sleep_disable();
+
+
+  
 
 }
 
@@ -139,6 +178,7 @@ void doEncoderA(){
     expectA = false;
     revCount++;
   }
+  sleep_disable();
 }
 
 /*! 
@@ -149,5 +189,6 @@ void doEncoderB(){
   {
     expectA = true;
   }
+  sleep_disable();
 }
 
