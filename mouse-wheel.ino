@@ -44,10 +44,13 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <avr/sleep.h>
+#include <PinChangeInterrupt.h>
+
 
 #define ENCODER_A  2          // hall effect sensor A
 #define ENCODER_B  3          // quadrature hall effect sensor B
 #define OLED_RESET 4          // reset pin for display module
+#define WAKE_UP_SWITCH 8    // switch to wake up display
 
 #define MAX_COUNT (unsigned long)10000000
 
@@ -67,11 +70,18 @@ volatile boolean displayIsActive = true;
 
 Adafruit_SSD1306 display(OLED_RESET);
 
+void doEncoderA(void);
+void doEncoderB(void);
+void wakeUp(void );
+
 void setup() 
 {
   pinMode(ENCODER_A, INPUT); 
   pinMode(ENCODER_B, INPUT); 
 
+  pinMode( WAKE_UP_SWITCH, INPUT_PULLUP );
+  digitalWrite( WAKE_UP_SWITCH, HIGH );
+  
   expectA = true;
   revCount = 0;
 
@@ -81,10 +91,14 @@ void setup()
   display.dim(true);
     
   // encoder pin on interrupt 0 (pin 2)
-  attachInterrupt(0, doEncoderA, FALLING);
+  attachInterrupt(digitalPinToInterrupt(ENCODER_A), doEncoderA, FALLING);
 
   // encoder pin on interrupt 1 (pin 3)
-  attachInterrupt(1, doEncoderB, FALLING);
+  attachInterrupt(digitalPinToInterrupt(ENCODER_B), doEncoderB, FALLING);
+
+  attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(WAKE_UP_SWITCH), wakeUp, FALLING );
+
+  disablePinChangeInterrupt(digitalPinToPinChangeInterrupt(WAKE_UP_SWITCH));
 
   // serial output
 #if SERIAL_OUTPUT
@@ -113,18 +127,9 @@ void loop()
   newRevs = count/2;
 
   /* if there is a change, update display */
-  if ((oldRevs != newRevs )  )
+  if ((oldRevs != newRevs )  && displayIsActive )
   {
     oldRevs = newRevs;
-
-    displayOnTime = millis();
-
-    if( !displayIsActive )
-    {
-      displayIsActive = true;
-      display.ssd1306_command( SSD1306_DISPLAYON );
-//      display.dim(false);
-    }
     
     display.clearDisplay();
     display.setCursor(1,5);
@@ -149,23 +154,36 @@ void loop()
 #endif
   }
 
-  if( millis() - displayOnTime > DISPLAY_TIME_OUT )
+
+  if( (millis() - displayOnTime > DISPLAY_TIME_OUT ) && displayIsActive )
   {
+    oldSFR = SREG;
+    cli();
     displayIsActive = false;
+    SREG = oldSFR;
+    
     display.ssd1306_command( SSD1306_DISPLAYOFF );
-//    display.dim(true);
-    set_sleep_mode( SLEEP_MODE_PWR_DOWN );
-    sleep_enable();
-    sleep_mode();
   }
 
-
-  // execute from here on wakeup
-  sleep_disable();
-
-
+  if( !displayIsActive )
+  {
+    // enable pin change interrupt
+    sleep_enable();  
+    enablePinChangeInterrupt(digitalPinToPinChangeInterrupt(WAKE_UP_SWITCH));
+    set_sleep_mode( SLEEP_MODE_PWR_DOWN );
+    sleep_mode();
   
-
+    // execute from here on wakeup
+    sleep_disable();
+  
+  
+    if( displayIsActive )
+    {
+      disablePinChangeInterrupt(digitalPinToPinChangeInterrupt(WAKE_UP_SWITCH));
+      displayOnTime = millis();
+      display.ssd1306_command( SSD1306_DISPLAYON );
+    }
+  }
 }
 
 /*! 
@@ -190,5 +208,13 @@ void doEncoderB(){
     expectA = true;
   }
   sleep_disable();
+}
+
+void wakeUp(void)
+{
+  sleep_disable();
+//  detachPCINT(WAKE_UP_SWITCH);
+//  disablePinChangeInterrupt(digitalPinToPinChangeInterrupt(WAKE_UP_SWITCH));
+  displayIsActive = true;
 }
 
