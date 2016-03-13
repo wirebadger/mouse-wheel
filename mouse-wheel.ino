@@ -51,6 +51,21 @@
 #define ENCODER_B  3          // quadrature hall effect sensor B
 #define OLED_RESET 4          // reset pin for display module
 #define WAKE_UP_SWITCH 8    // switch to wake up display
+#define PIN_VBATT      A0
+
+#define R1                        100     //k ohms
+#define R2                        100     //k ohms
+#define VREF                      3300    // mV
+
+#define VOLTAGE_SCALE             (unsigned long)(((R1+R2)*(unsigned long)VREF)/(R1 * 1024UL))
+
+/* From http://www.powerstream.com/AA-tests.htm */
+#define VBATT_FULL               (1400UL*3)
+#define VBATT_EMPTY              (1100UL*3)   // below 3.3 v we have problems with maintaing vref
+#define CAPACITY                 (2000UL)     // mAh
+
+#define REMAINING_PERCENT(mV)            ((((mV)-VBATT_EMPTY)*100)/(VBATT_FULL-VBATT_EMPTY))
+
 
 #define MAX_COUNT (unsigned long)10000000
 
@@ -74,6 +89,8 @@ void doEncoderA(void);
 void doEncoderB(void);
 void wakeUp(void );
 
+
+
 void setup() 
 {
   pinMode(ENCODER_A, INPUT); 
@@ -81,6 +98,8 @@ void setup()
 
   pinMode( WAKE_UP_SWITCH, INPUT_PULLUP );
   digitalWrite( WAKE_UP_SWITCH, HIGH );
+
+  pinMode(PIN_VBATT, INPUT);
   
   expectA = true;
   revCount = 0;
@@ -126,13 +145,28 @@ void loop()
   /* we count half revolutions */
   newRevs = count/2;
 
-  /* if there is a change, update display */
-  if ((oldRevs != newRevs )  && displayIsActive )
+  if( displayIsActive )
   {
-    oldRevs = newRevs;
-    
     display.clearDisplay();
-    display.setCursor(1,5);
+    display.setCursor(1,1);
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    
+    display.print( "Battery" );
+    unsigned int vbatt = analogRead( PIN_VBATT ) * VOLTAGE_SCALE;
+      
+    display.setCursor(100,1);
+    if( vbatt < VBATT_EMPTY )
+      vbatt = VBATT_EMPTY;
+    unsigned int percent = REMAINING_PERCENT(vbatt);
+    if ( percent > 100 )
+      percent = 100;
+    display.print( percent );
+    display.print("%");
+
+
+    oldRevs = newRevs;
+    display.setCursor(1,11);
     display.setTextSize(3);
     display.setTextColor(WHITE);
 
@@ -148,11 +182,13 @@ void loop()
 #endif
     } while( position > 0 );
     
-    display.display();    
+        
 #if SERIAL_OUTPUT
     Serial.println();
 #endif
   }
+  display.display();  
+  
 
 
   if( (millis() - displayOnTime > DISPLAY_TIME_OUT ) && displayIsActive )
