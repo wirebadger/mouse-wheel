@@ -58,6 +58,7 @@
 #define VREF                      3300    // mV
 
 #define VOLTAGE_SCALE             (unsigned long)(((R1+R2)*(unsigned long)VREF)/(R1 * 1024UL))
+#define VOLTAGE_HYSTERISIS        3       // mV
 
 /* From http://www.powerstream.com/AA-tests.htm */
 #define VBATT_FULL               (1400UL*3)
@@ -133,6 +134,7 @@ void loop()
   uint8_t oldSFR;
   static unsigned long oldRevs = -1;
   static unsigned long displayOnTime = 0;
+  static unsigned int voldbatt = 0;
 
   /* disable interrupts so we can safely read and modify variables */
   oldSFR = SREG;
@@ -158,12 +160,16 @@ void loop()
     display.setCursor(100,1);
     if( vbatt < VBATT_EMPTY )
       vbatt = VBATT_EMPTY;
-    unsigned int percent = REMAINING_PERCENT(vbatt);
+    if( abs(vbatt - voldbatt) > VOLTAGE_HYSTERISIS )
+    {
+      voldbatt = vbatt;
+    }
+    unsigned int percent = REMAINING_PERCENT(voldbatt);
     if ( percent > 100 )
       percent = 100;
     display.print( percent );
-    display.print("%");
-
+    display.print("% ");
+    
 
     oldRevs = newRevs;
     display.setCursor(1,11);
