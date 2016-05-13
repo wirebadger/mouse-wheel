@@ -53,16 +53,16 @@
 #define WAKE_UP_SWITCH 8    // switch to wake up display
 #define PIN_VBATT      A0
 
-#define R1                        100     //k ohms
+#define R1                        47      //k ohms
 #define R2                        100     //k ohms
-#define VREF                      3300    // mV
+#define VREF                      1100    // mV internal reference
 
 #define VOLTAGE_SCALE             (unsigned long)(((R1+R2)*(unsigned long)VREF)/(R1 * 1024UL))
 #define VOLTAGE_HYSTERISIS        3       // mV
 
 /* From http://www.powerstream.com/AA-tests.htm */
-#define VBATT_FULL               (1400UL*3)
-#define VBATT_EMPTY              (1100UL*3)   // below 3.3 v we have problems with maintaing vref
+#define VBATT_FULL               (1450UL*2)   // times number of cells (below 1.45 too non-linear)
+#define VBATT_EMPTY              (1200UL*2)   // was 1.1V/cell but with only 2cells the limit is the hall effect Vmin 2.4V
 #define CAPACITY                 (2000UL)     // mAh
 
 #define REMAINING_PERCENT(mV)            ((((mV)-VBATT_EMPTY)*100)/(VBATT_FULL-VBATT_EMPTY))
@@ -94,8 +94,8 @@ void wakeUp(void );
 
 void setup() 
 {
-  pinMode(ENCODER_A, INPUT); 
-  pinMode(ENCODER_B, INPUT); 
+  pinMode(ENCODER_A, INPUT_PULLUP); 
+  pinMode(ENCODER_B, INPUT_PULLUP); 
 
   pinMode( WAKE_UP_SWITCH, INPUT_PULLUP );
   digitalWrite( WAKE_UP_SWITCH, HIGH );
@@ -124,6 +124,8 @@ void setup()
 #if SERIAL_OUTPUT
   Serial.begin (115200);
 #endif
+
+  analogReference( INTERNAL );   // 1.1v internal reference
 }
 
 
