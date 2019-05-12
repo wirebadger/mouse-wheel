@@ -39,7 +39,16 @@
  * 
  */
 
-#include <SPI.h>
+// uncomment one of these
+// #define LITHIUM_1S
+#define ALKALINE_2AA
+
+// uncomment one of these
+//#define LCD_128_64       // 128x64 display, i2c address 0x78/0x3C first 5 units
+#define LCD_128_32       // 128x32 display, i2c address 0x78/0x3C
+//#define LCD_96_16        // 0.9" narrow OLED
+
+
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -53,17 +62,46 @@
 #define WAKE_UP_SWITCH 8    // switch to wake up display
 #define PIN_VBATT      A0
 
-#define R1                        47      //k ohms
-#define R2                        100     //k ohms
+
+#ifdef LCD_96_16
+#define LCDADDR     0x3C
+#define LCDWIDTH    96
+#define LCDHEIGHT   16 
+#elif defined(LCD_128_32)
+#define LCDADDR     0x3C
+#define LCDWIDTH    128
+#define LCDHEIGHT   32  
+#elif defined(LCD_128_64)
+#define LCDADDR     0x3C
+#define LCDWIDTH    128
+#define LCDHEIGHT   64 
+#else
+#error No display defined
+#endif
+/* Different units have different values of the resistor divider. The intention was to run from 3V but now also
+ * allow for 3v7.
+ * R2 47K, sometimes two in parallel 
+ * R1 100K, change to 150K for LiOn
+ */
+#define R2                        47      //k ohms
+#define R1                        150     //k ohms
 #define VREF                      1100    // mV internal reference
 
-#define VOLTAGE_SCALE             (unsigned long)(((R1+R2)*(unsigned long)VREF)/(R1 * 1024UL))
+#define VOLTAGE_SCALE             (unsigned long)(((R1+R2)*(unsigned long)VREF)/(R2 * 1024UL))
 #define VOLTAGE_HYSTERISIS        3       // mV
 
+#ifdef ALKALINE_2AA
 /* From http://www.powerstream.com/AA-tests.htm */
 #define VBATT_FULL               (1450UL*2)   // times number of cells (below 1.45 too non-linear)
 #define VBATT_EMPTY              (1200UL*2)   // was 1.1V/cell but with only 2cells the limit is the hall effect Vmin 2.4V
 #define CAPACITY                 (2000UL)     // mAh
+#elif defined(LITHIUM_1S)
+#define VBATT_FULL               (3700UL)   
+#define VBATT_EMPTY              (2900UL)    // 
+#define CAPACITY                 (2600UL)    // mAh
+#else
+#error No Battery chemistry defined
+#endif
 
 #define REMAINING_PERCENT(mV)            ((((mV)-VBATT_EMPTY)*100)/(VBATT_FULL-VBATT_EMPTY))
 
@@ -84,7 +122,7 @@ volatile boolean expectA;
 volatile boolean displayIsActive = true;
 
 
-Adafruit_SSD1306 display(OLED_RESET);
+Adafruit_SSD1306 display(LCDWIDTH, LCDHEIGHT, &Wire); //deprecated constructor display(OLED_RESET);
 
 void doEncoderA(void);
 void doEncoderB(void);
@@ -106,8 +144,8 @@ void setup()
   revCount = 0;
 
   /* Initialise OLED */
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
-  display.clearDisplay();                     // Clear the buffer.
+  display.begin(SSD1306_SWITCHCAPVCC, LCDADDR);  // initialize with the I2C addr
+  display.clearDisplay();                            // Clear the buffer.
   display.dim(true);
     
   // encoder pin on interrupt 0 (pin 2)
@@ -261,4 +299,3 @@ void wakeUp(void)
 //  disablePinChangeInterrupt(digitalPinToPinChangeInterrupt(WAKE_UP_SWITCH));
   displayIsActive = true;
 }
-
