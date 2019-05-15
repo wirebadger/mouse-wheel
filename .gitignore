@@ -1,1 +1,5 @@
 *.bak
+.vscode/ipch/2590cc634e13d853/MOUSE-WHEEL.ipch
+.vscode/ipch/2590cc634e13d853/mmap_address.bin
+.vscode/arduino.json
+.vscode/c_cpp_properties.json

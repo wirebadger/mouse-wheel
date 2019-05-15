@@ -110,7 +110,8 @@
 
 #define SERIAL_OUTPUT 0
 
-#define DISPLAY_TIME_OUT  10000    // display timeout in ms
+#define DISPLAY_TIME_OUT      10000    // display timeout in ms
+#define DISPLAY_REFRESH_TIME  250       // refresh display at this rate
 
 /*! These variables must be declared volatile because they
  * are modifed in the interrupt handlers. If the main loop
@@ -174,7 +175,9 @@ void loop()
   uint8_t oldSFR;
   static unsigned long oldRevs = -1;
   static unsigned long displayOnTime = 0;
+  static unsigned long displayRefreshTime = 0;
   static unsigned int voldbatt = 0;
+  unsigned long timeNow = millis();
 
   /* disable interrupts so we can safely read and modify variables */
   oldSFR = SREG;
@@ -187,7 +190,7 @@ void loop()
   /* we count half revolutions */
   newRevs = count/2;
 
-  if( displayIsActive )
+  if( (timeNow - displayRefreshTime > DISPLAY_REFRESH_TIME) && displayIsActive)
   {
     display.clearDisplay();
     display.setCursor(1,1);
@@ -232,12 +235,14 @@ void loop()
 #if SERIAL_OUTPUT
     Serial.println();
 #endif
+
+    display.display();
+    displayRefreshTime = timeNow;
+      
   }
-  display.display();  
   
 
-
-  if( (millis() - displayOnTime > DISPLAY_TIME_OUT ) && displayIsActive )
+  if( (timeNow - displayOnTime > DISPLAY_TIME_OUT ) && displayIsActive )
   {
     oldSFR = SREG;
     cli();
