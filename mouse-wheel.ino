@@ -92,8 +92,10 @@
 
 #ifdef ALKALINE_2AA
 /* From http://www.powerstream.com/AA-tests.htm */
+/* an AA battery is full at 1.45V, fully discharged at 1.1v*/
 #define VBATT_FULL               (1450UL*2)   // times number of cells (below 1.45 too non-linear)
-#define VBATT_EMPTY              (1200UL*2)   // was 1.1V/cell but with only 2cells the limit is the hall effect Vmin 2.4V
+//#define VBATT_EMPTY              (1200UL*2)   // the limit is the TLE4913 hall effect Vmin 2.4V
+#define VBATT_EMPTY              (1100UL*2)   // TSH253CX operates down to 1v8 so 1.1V/cell is the limit 
 #define CAPACITY                 (2000UL)     // mAh
 #elif defined(LITHIUM_1S)
 #define VBATT_FULL               (3700UL)   
