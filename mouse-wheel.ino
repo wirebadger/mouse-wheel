@@ -87,7 +87,7 @@
 #define R1                        150     //k ohms
 #define VREF                      1100    // mV internal reference
 
-#define VOLTAGE_SCALE             (unsigned long)(((R1+R2)*(unsigned long)VREF)/(R2 * 1024UL))
+#define VOLTAGE_SCALE             (unsigned long)(((R1+R2)*(unsigned long)VREF)/(R2))
 #define VOLTAGE_HYSTERISIS        3       // mV
 
 #ifdef ALKALINE_2AA
@@ -110,7 +110,7 @@
 
 #define MAX_COUNT (unsigned long)10000000
 
-#define SERIAL_OUTPUT 0
+#define SERIAL_OUTPUT 1
 
 #define DISPLAY_TIME_OUT      10000    // display timeout in ms
 #define DISPLAY_REFRESH_TIME  250       // refresh display at this rate
@@ -200,7 +200,7 @@ void loop()
     display.setTextColor(WHITE);
     
     display.print( "Battery" );
-    unsigned int vbatt = analogRead( PIN_VBATT ) * VOLTAGE_SCALE;
+    unsigned int vbatt = (analogRead( PIN_VBATT ) * VOLTAGE_SCALE)/1024;
       
     display.setCursor(100,1);
     if( vbatt < VBATT_EMPTY )
