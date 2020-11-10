@@ -1,16 +1,17 @@
 # mouse-wheel
-Arduino based exercise wheel counter for a (real, live, furry mammal) mouse
+Arduino based exercise wheel counter for mice
 
 # Overview
-We want to see how much exercise our mouse is doing so want to count the number of revolutions on his mouse wheel.  We don't care which way the wheel is turning or how fast. In principle this is quite a simple revolution counter.
+We want to see how much exercise a mouse is doing so want to count the number of revolutions on the mouse wheel.  We don't care which way the wheel is turning or how fast. In principle this is quite a simple revolution counter.
 
-# Design
+# Prototype
+## Design
 
-A magnet is glued under the wheel and every time it passes over a hall effect sensor it generates a pulse which we can count by connecting it to one of the external interrupt pins on the Arduino board.  This simple arrangement generates a lot of noisy triggers when the wheel rests with the magnet just over the sensor.  To avoid them, a second magnet is glued 180 degrees further round the wheel and a second hall effect sensor (B) is placed at 90 degrees.  Each time a magnet passes a sensor we switch to looking at the other sensor.  Every 1/4 revolution the wheel generates a signal from one of the sensors and every half turn passes sensor A and increments the count.  We are actually counting half revolutions so the result is scaled by two before display.
+A magnet is glued under the wheel and every time it passes over a hall effect sensor it generates a pulse which is counted by connecting it to one of the external interrupt pins on the Arduino board.  This simple arrangement generates a lot of noisy triggers when the wheel rests with the magnet just over the sensor.  To avoid them, a second magnet is glued 180 degrees further round the wheel and a second hall effect sensor (B) is placed at 90 degrees.  Each time a magnet passes a sensor we switch to looking at the other sensor.  Every 1/4 revolution the wheel generates a signal from one of the sensors and every half turn passes sensor A and increments the count.  We are actually counting half revolutions so the result is scaled by two before display.
 
-# Build
+## Build
 
-Glue two magnets 180 degrees apart on the wheel section.  It matters which way up they go as the sensors only detect one magnetic polarity.  That's why I put the black dots on the second time I glued them..
+Glue two magnets 180 degrees apart on the wheel section.  It matters which way up they go as the sensors only detect one magnetic polarity.  
 
 ![Wheel with magnets](https://github.com/wirebadger/mouse-wheel/blob/master/images/IMG_0185.JPG)
 
@@ -25,9 +26,20 @@ The rest of the electronics will be housed in an aluminium enclosure and battery
 ## Breadboard version
 ![Electronics](https://github.com/wirebadger/mouse-wheel/blob/master/images/IMG_0183.JPG)
 
-## First Build
 
+# Results
 
+The waveform from the two hall effect sensors can be seen below.
+
+![Outputs from both Hall Effect sensors](https://github.com/wirebadger/mouse-wheel/blob/master/images/Screenshot%202016-03-05%2019.19.12.png)
+
+A falling edge on the top trace is counted only after there has been a falling edge on the second trace (brown).
+
+If the wheel happens to stop over one of the sensors a noisy trace is generated but the addtional transitions are not counted as there is no activity on the second channel.
+
+![Wheel stops over one sensor](https://github.com/wirebadger/mouse-wheel/blob/master/images/Screenshot%202016-03-05%2019.25.40.png)
+
+# First Production Build
 
 Pro Mini connections:
 
@@ -49,8 +61,8 @@ Pro Mini connections:
 
 The display is the AdaFruit OLED 128x32 I2C module
 
-# Components
-## Hardware
+## Components
+### Hardware
 [Display Module](https://www.adafruit.com/products/931) Adafruit OLED display
 
 [Sensor PCB](http://www.dx.com/p/high-torque-25mm-dc-12-0v-330rpm-encoder-precision-gear-motor-418535) Removed from Motor
@@ -67,22 +79,10 @@ Remove the LED resistor on the Pro Mini to save current
 |Display On  | 20mA    |
 |Display Off | 4mA     |
  
-## Libraries
+### Libraries
 Requires the following libraries:
 * Adafruit_GFX
 * Adafruit_SSD1306
 * Pin Change Interrupt
 
 Just install them using the library manager.
-
-# Results
-
-The waveform from the two hall effect sensors can be seen below.
-
-![Outputs from both Hall Effect sensors](https://github.com/wirebadger/mouse-wheel/blob/master/images/Screenshot%202016-03-05%2019.19.12.png)
-
-A falling edge on the top trace is counted only after there has been a falling edge on the second trace (brown).
-
-If the wheel happens to stop over one of the sensors a noisy trace is generated but the addtional transitions are not counted as there is no activity on the second channel.
-
-![Wheel stops over one sensor](https://github.com/wirebadger/mouse-wheel/blob/master/images/Screenshot%202016-03-05%2019.25.40.png)
