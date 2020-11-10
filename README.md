@@ -89,9 +89,9 @@ Just install them using the library manager.
 
 # Main production
 
-![Base](https://github.com/wirebadger/mouse-wheel/blob/master/images/IMG3390.JPG)
+![Base](https://github.com/wirebadger/mouse-wheel/blob/master/images/IMG_3390.JPG)
 
-![Internals](https://github.com/wirebadger/mouse-wheel/blob/master/images/IMG3353.JPG)
+![Internals](https://github.com/wirebadger/mouse-wheel/blob/master/images/IMG_3353.JPG)
 
 ## 3D printed mechanics
 
