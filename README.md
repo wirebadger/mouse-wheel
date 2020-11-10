@@ -86,3 +86,22 @@ Requires the following libraries:
 * Pin Change Interrupt
 
 Just install them using the library manager.
+
+# Main production
+
+![Base](https://github.com/wirebadger/mouse-wheel/blob/master/images/IMG3390.JPG)
+
+![Internals](https://github.com/wirebadger/mouse-wheel/blob/master/images/IMG3353.JPG)
+
+## 3D printed mechanics
+
+![Assembly](https://github.com/wirebadger/mouse-wheel/blob/master/images/Assembly.png)
+
+![Base](https://github.com/wirebadger/mouse-wheel/blob/master/images/base.png)
+
+![Underside](https://github.com/wirebadger/mouse-wheel/blob/master/images/bottom.png)
+
+
+See mechanical directory for design files
+
+
